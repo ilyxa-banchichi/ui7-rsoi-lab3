@@ -255,7 +255,7 @@ public class GatewayController(
         catch (HttpRequestException e)
         {
             if (e.StatusCode == null)
-                return StatusCode((int)HttpStatusCode.ServiceUnavailable, JsonSerializer.Serialize("Bonus Service unavailable"));
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
             
             return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
         }
