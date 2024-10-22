@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\Common\src\Common.CircuitBreaker\Common.CircuitBreaker.csproj" />
       <ProjectReference Include="..\..\..\Common\src\Common.Models\Common.Models.csproj" />
       <ProjectReference Include="..\Gateway.Common\Gateway.Common.csproj" />
     </ItemGroup>

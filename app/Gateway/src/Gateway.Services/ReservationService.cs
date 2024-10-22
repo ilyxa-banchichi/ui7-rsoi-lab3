@@ -1,11 +1,14 @@
 using System.Net;
-using System.Net.Http.Json;
+using Common.CircuitBreaker;
 using Common.Models.DTO;
+using Microsoft.Extensions.Logging;
 
 namespace Gateway.Services;
 
-public class ReservationService(IHttpClientFactory httpClientFactory, string baseUrl)
-    : BaseHttpService(httpClientFactory, baseUrl), IReservationService
+public class ReservationService(
+    IHttpClientFactory httpClientFactory, string baseUrl,
+    ICircuitBreaker circuitBreaker, ILogger<ReservationService> logger)
+    : BaseHttpService(httpClientFactory, baseUrl, circuitBreaker, logger), IReservationService
 {
     public async Task<List<RawBookReservationResponse>?> GetUserReservationsAsync(string xUserName)
     {

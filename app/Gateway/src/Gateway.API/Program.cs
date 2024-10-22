@@ -1,3 +1,4 @@
+using Common.CircuitBreaker;
 using Common.Models.Serialization;
 using Gateway.Services;
 
@@ -25,22 +26,38 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     });
 
+builder.Services.AddSingleton<ICircuitBreaker<LibraryService>, CircuitBreaker<LibraryService>>();
+builder.Services.AddSingleton<ICircuitBreaker<ReservationService>, CircuitBreaker<ReservationService>>();
+builder.Services.AddSingleton<ICircuitBreaker<RatingService>, CircuitBreaker<RatingService>>();
+
 builder.Services.AddTransient<ILibraryService, LibraryService>(provider =>
 {
-    var clientFactory = provider.GetRequiredService<IHttpClientFactory>();
-    return new LibraryService(clientFactory, builder.Configuration.GetConnectionString("LibraryService"));
+    return new LibraryService(
+        httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(), 
+        baseUrl: builder.Configuration.GetConnectionString("LibraryService"),
+        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<LibraryService>>(),
+        logger: provider.GetRequiredService<ILogger<LibraryService>>()
+    );
 });
 
 builder.Services.AddTransient<IReservationService, ReservationService>(provider =>
 {
-    var clientFactory = provider.GetRequiredService<IHttpClientFactory>();
-    return new ReservationService(clientFactory, builder.Configuration.GetConnectionString("ReservationService"));
+    return new ReservationService(
+        httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(),
+        baseUrl: builder.Configuration.GetConnectionString("ReservationService"),
+        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<ReservationService>>(),
+        logger: provider.GetRequiredService<ILogger<ReservationService>>()
+    );
 });
 
 builder.Services.AddTransient<IRatingService, RatingService>(provider =>
 {
-    var clientFactory = provider.GetRequiredService<IHttpClientFactory>();
-    return new RatingService(clientFactory, builder.Configuration.GetConnectionString("RatingService"));
+    return new RatingService(
+        httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(), 
+        baseUrl: builder.Configuration.GetConnectionString("RatingService"),
+        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<RatingService>>(),
+        logger: provider.GetRequiredService<ILogger<RatingService>>()
+    );
 });
 
 var app = builder.Build();

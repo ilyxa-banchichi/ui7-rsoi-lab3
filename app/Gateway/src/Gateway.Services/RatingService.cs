@@ -1,18 +1,27 @@
+using System.Net;
+using Common.CircuitBreaker;
 using Common.Models.DTO;
+using Microsoft.Extensions.Logging;
 
 namespace Gateway.Services;
 
-public class RatingService(IHttpClientFactory httpClientFactory, string baseUrl)
-    : BaseHttpService(httpClientFactory, baseUrl), IRatingService
+public class RatingService(
+    IHttpClientFactory httpClientFactory, string baseUrl,
+    ICircuitBreaker circuitBreaker, ILogger<RatingService> logger)
+    : BaseHttpService(httpClientFactory, baseUrl, circuitBreaker, logger), IRatingService
 {
     public async Task<UserRatingResponse?> GetUserRating(string xUserName)
     {
-        var method = $"/api/v1/rating";
-        return await GetAsync<UserRatingResponse>(method,
-            new Dictionary<string, string>()
+        return await circuitBreaker.ExecuteCommandAsync(async () =>
             {
-                { "X-User-Name", xUserName }
-            });
+                var method = $"/api/v1/rating";
+                return await GetAsync<UserRatingResponse>(method,
+                    new Dictionary<string, string>()
+                    {
+                        { "X-User-Name", xUserName }
+                    });
+            },
+            fallback: async () => new UserRatingResponse() { Stars = 10001 });
     }
 
     public async Task<UserRatingResponse?> IncreaseRating(string xUserName)

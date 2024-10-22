@@ -1,10 +1,16 @@
+using Common.CircuitBreaker;
 using Common.Models.DTO;
 using Common.Models.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace Gateway.Services;
 
-public class LibraryService(IHttpClientFactory httpClientFactory, string baseUrl)
-    : BaseHttpService(httpClientFactory, baseUrl), ILibraryService
+public class LibraryService(
+    IHttpClientFactory httpClientFactory,
+    string baseUrl,
+    ICircuitBreaker circuitBreaker,
+    ILogger<LibraryService> logger)
+    : BaseHttpService(httpClientFactory, baseUrl, circuitBreaker, logger), ILibraryService
 {
     public async Task<LibraryPaginationResponse?> GetLibrariesInCityAsync(
         string city, int page, int size)
