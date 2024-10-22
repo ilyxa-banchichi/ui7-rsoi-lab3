@@ -30,25 +30,17 @@ public class CircuitBreaker<TService> : ICircuitBreaker<TService>
         
         return result;
     }
-
-    // private bool TryDoTransition()
+    
+    // public async Task ExecuteCommandAsync(Func<Task> command, Func<Task>? fallback = null)
     // {
-    //     switch (_state.State)
+    //     _logger.LogDebug($"CircuitBreaker in state {_state.State}");
+    //     var newState = _state.TryDoTransition();
+    //     if (newState != State.None)
     //     {
-    //         case State.Close:
-    //             var close = _state as CloseState;
-    //             
-    //             break;
-    //         case State.Open:
-    //             var open = _state as OpenState;
-    //             
-    //             break;
-    //         case State.HalfOpen:
-    //             var halfOpen = _state as HalfOpenState; ;
-    //             if (halfOpen.)
-    //                 _state = new HalfOpenState();
-    //             
-    //             break;
+    //         _state = _stateFactory.Create(newState);
+    //         _logger.LogDebug($"New state {newState}");
     //     }
+    //     
+    //     await _state.ExecuteCommandAsync(command, fallback);
     // }
 }

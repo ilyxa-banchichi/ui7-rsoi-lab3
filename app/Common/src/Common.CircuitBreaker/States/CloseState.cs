@@ -29,10 +29,10 @@ public class CloseState : IState
             if (ex.StatusCode == null || ex.StatusCode >= (HttpStatusCode)500)
             {
                 _failureRate++;
+                
+                if (fallback != null)
+                    return await fallback();
             }
-
-            if (fallback != null)
-                return await fallback();
             
             throw;
         }

@@ -1,15 +1,24 @@
 using System.Net;
 using Common.CircuitBreaker;
 using Common.Models.DTO;
+using Gateway.RequestQueueService;
 using Microsoft.Extensions.Logging;
 
 namespace Gateway.Services;
 
-public class RatingService(
-    IHttpClientFactory httpClientFactory, string baseUrl,
-    ICircuitBreaker circuitBreaker, ILogger<RatingService> logger)
-    : BaseHttpService(httpClientFactory, baseUrl, circuitBreaker, logger), IRatingService
+public class RatingService : BaseHttpService, IRatingService
 {
+    private readonly IRequestQueueService _queueService;
+    
+    public RatingService(
+        IHttpClientFactory httpClientFactory, string baseUrl,
+        ICircuitBreaker circuitBreaker, ILogger<RatingService> logger,
+        IRequestQueueService queueService)
+        : base(httpClientFactory, baseUrl, circuitBreaker, logger)
+    {
+        _queueService = queueService;
+    }
+
     public async Task<UserRatingResponse?> GetUserRating(string xUserName)
     {
         return await circuitBreaker.ExecuteCommandAsync(async () =>
@@ -27,20 +36,45 @@ public class RatingService(
     public async Task<UserRatingResponse?> IncreaseRating(string xUserName)
     {
         var method = $"/api/v1/rating/increase";
-        return await PatchAsync<UserRatingResponse>(method,
-            headers: new Dictionary<string, string>()
+        var request = new HttpRequestMessage(HttpMethod.Patch, method);
+        request.Headers.Add("X-User-Name", xUserName);
+
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<UserRatingResponse>(request),
+            fallback: async () =>
             {
-                { "X-User-Name", xUserName }
+                await _queueService.EnqueueRequestAsync("rating", request);
+                return null;
             });
     }
 
     public async Task<UserRatingResponse?> DecreaseRating(string xUserName)
     {
         var method = $"/api/v1/rating/decrease";
-        return await PatchAsync<UserRatingResponse>(method,
-            headers: new Dictionary<string, string>()
+        var request = new HttpRequestMessage(HttpMethod.Patch, method);
+        request.Headers.Add("X-User-Name", xUserName);
+
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<UserRatingResponse>(request),
+            fallback: async () =>
             {
-                { "X-User-Name", xUserName }
+                await _queueService.EnqueueRequestAsync("rating", request);
+                return null;
+            });
+    }
+    
+    public async Task SendAsync(HttpRequestMessage request)
+    {
+        await circuitBreaker.ExecuteCommandAsync<object>(
+            async () =>
+            {
+                await base.SendAsync(request);
+                return null;
+            },
+            fallback: async () =>
+            {
+                await _queueService.EnqueueRequestAsync("rating", request);
+                return null;
             });
     }
 }

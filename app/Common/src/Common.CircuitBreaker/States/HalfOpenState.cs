@@ -30,7 +30,7 @@ public class HalfOpenState : IState
         {
             _hasFailedRequest = ex.StatusCode == null || ex.StatusCode >= (HttpStatusCode)500;
 
-            if (fallback != null)
+            if (_hasFailedRequest && fallback != null)
                 return await fallback();
             
             throw;

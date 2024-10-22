@@ -118,4 +118,43 @@ public abstract class BaseHttpService
 
         return default;
     }
+    
+    protected async Task<T?> SendAsync<T>(HttpRequestMessage requestMessage)
+    {
+        httpClient.DefaultRequestHeaders.Clear();
+
+        var response = await httpClient.SendAsync(requestMessage);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(
+                HttpRequestError.InvalidResponse,
+                message: $"StatusCode: {response.StatusCode}", 
+                statusCode: response.StatusCode);
+        }
+
+        if (response.StatusCode != HttpStatusCode.NoContent)
+        {
+            var result = await response.Content.ReadFromJsonAsync<T>();
+            if (result == null)
+                throw new JsonException("Invalid response");
+        
+            return result;
+        }
+
+        return default;
+    }
+    
+    protected async Task SendAsync(HttpRequestMessage requestMessage)
+    {
+        httpClient.DefaultRequestHeaders.Clear();
+
+        var response = await httpClient.SendAsync(requestMessage);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(
+                HttpRequestError.InvalidResponse,
+                message: $"StatusCode: {response.StatusCode}", 
+                statusCode: response.StatusCode);
+        }
+    }
 }

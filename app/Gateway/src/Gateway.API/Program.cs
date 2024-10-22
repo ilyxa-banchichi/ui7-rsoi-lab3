@@ -1,6 +1,8 @@
 using Common.CircuitBreaker;
 using Common.Models.Serialization;
+using Gateway.RequestQueueService;
 using Gateway.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,16 +28,16 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     });
 
-builder.Services.AddSingleton<ICircuitBreaker<LibraryService>, CircuitBreaker<LibraryService>>();
-builder.Services.AddSingleton<ICircuitBreaker<ReservationService>, CircuitBreaker<ReservationService>>();
-builder.Services.AddSingleton<ICircuitBreaker<RatingService>, CircuitBreaker<RatingService>>();
+builder.Services.AddSingleton<ICircuitBreaker<ILibraryService>, CircuitBreaker<ILibraryService>>();
+builder.Services.AddSingleton<ICircuitBreaker<IReservationService>, CircuitBreaker<IReservationService>>();
+builder.Services.AddSingleton<ICircuitBreaker<IRatingService>, CircuitBreaker<IRatingService>>();
 
 builder.Services.AddTransient<ILibraryService, LibraryService>(provider =>
 {
     return new LibraryService(
         httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(), 
         baseUrl: builder.Configuration.GetConnectionString("LibraryService"),
-        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<LibraryService>>(),
+        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<ILibraryService>>(),
         logger: provider.GetRequiredService<ILogger<LibraryService>>()
     );
 });
@@ -45,7 +47,7 @@ builder.Services.AddTransient<IReservationService, ReservationService>(provider 
     return new ReservationService(
         httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(),
         baseUrl: builder.Configuration.GetConnectionString("ReservationService"),
-        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<ReservationService>>(),
+        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<IReservationService>>(),
         logger: provider.GetRequiredService<ILogger<ReservationService>>()
     );
 });
@@ -55,10 +57,17 @@ builder.Services.AddTransient<IRatingService, RatingService>(provider =>
     return new RatingService(
         httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(), 
         baseUrl: builder.Configuration.GetConnectionString("RatingService"),
-        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<RatingService>>(),
-        logger: provider.GetRequiredService<ILogger<RatingService>>()
+        circuitBreaker: provider.GetRequiredService<ICircuitBreaker<IRatingService>>(),
+        logger: provider.GetRequiredService<ILogger<RatingService>>(),
+        queueService: provider.GetRequiredService<IRequestQueueService>()
     );
 });
+
+var redisConnection = builder.Configuration.GetConnectionString("RedisQueue");
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnection));
+
+builder.Services.AddTransient<IRequestQueueService, RequestQueueService>();
+builder.Services.AddHostedService<RequestQueueJob>();
 
 var app = builder.Build();
 

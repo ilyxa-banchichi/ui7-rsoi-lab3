@@ -236,4 +236,19 @@ public class GatewayController(
             return StatusCode(StatusCodes.Status500InternalServerError, e);
         }
     }
+    
+    [HttpPost("test")]
+    [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
+    public async Task<IActionResult> ReturnBook()
+    {
+        try
+        {
+            await ratingService.IncreaseRating("Jopa");
+            return Ok(null);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, e);
+        }
+    }
 }
