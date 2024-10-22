@@ -17,7 +17,7 @@ services:
       - db-local
 
   gateway:
-    image: ilyxabanchichi/rsoi-lab2-gateway:latest
+    image: ilyxabanchichi/rsoi-lab3-gateway:latest
     restart: always
     build:
       context: ./app
@@ -37,7 +37,7 @@ services:
       - rating-local
 
   library-service:
-    image: ilyxabanchichi/rsoi-lab2-library-service:latest
+    image: ilyxabanchichi/rsoi-lab3-library-service:latest
     restart: always
     build:
       context: ./app
@@ -57,7 +57,7 @@ services:
       - library-local
 
   reservation-service:
-    image: ilyxabanchichi/rsoi-lab2-reservation-service:latest
+    image: ilyxabanchichi/rsoi-lab3-reservation-service:latest
     restart: always
     build:
       context: ./app
@@ -77,7 +77,7 @@ services:
       - reservation-local
 
   rating-service:
-    image: ilyxabanchichi/rsoi-lab2-rating-service:latest
+    image: ilyxabanchichi/rsoi-lab3-rating-service:latest
     restart: always
     build:
       context: ./app
