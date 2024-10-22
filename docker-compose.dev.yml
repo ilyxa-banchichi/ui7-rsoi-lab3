@@ -18,11 +18,11 @@ services:
 
   redis:
     image: redis:latest
-    container_name: redis_container
+    container_name: redis
     environment:
       - REDIS_PASSWORD=redis_pass
     ports:
-      - 8010:6379
+      - 8001:6379
     volumes:
       - redis-data:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
@@ -32,6 +32,7 @@ services:
 networks:
   db-local:
     driver: bridge
+  redis-local:
 
 volumes:
   db-data:

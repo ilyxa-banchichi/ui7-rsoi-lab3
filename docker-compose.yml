@@ -16,6 +16,21 @@ services:
     networks:
       - db-local
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    environment:
+      - REDIS_PASSWORD=redis_pass
+    ports:
+      - 8001:6379
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - redis-local
+
   gateway:
     image: ilyxabanchichi/rsoi-lab3-gateway:latest
     restart: always
@@ -29,12 +44,14 @@ services:
       - ConnectionStrings__RatingService=http://rating-service:8050
       - ConnectionStrings__LibraryService=http://library-service:8060
       - ConnectionStrings__ReservationService=http://reservation-service:8070
+      - ConnectionStrings__RedisQueue=redis:6379,password=redis_pass,abortConnect=false
     ports:
       - 8080:8080
     networks:
       - library-local
       - reservation-local
       - rating-local
+      - redis-local
 
   library-service:
     image: ilyxabanchichi/rsoi-lab3-library-service:latest
@@ -102,6 +119,8 @@ networks:
   rating-local:
   db-local:
     driver: bridge
+  redis-local:
 
 volumes:
   db-data:
+  redis-data:
