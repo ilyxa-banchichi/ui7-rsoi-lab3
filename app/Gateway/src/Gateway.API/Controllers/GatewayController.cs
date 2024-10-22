@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Text.Json;
 using Common.Models.DTO;
 using Common.Models.Enums;
 using Gateway.Common.Models.DTO;
@@ -253,6 +254,9 @@ public class GatewayController(
         }
         catch (HttpRequestException e)
         {
+            if (e.StatusCode == null)
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, JsonSerializer.Serialize("Bonus Service unavailable"));
+            
             return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
         }
         catch (Exception e)
