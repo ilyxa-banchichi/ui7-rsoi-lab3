@@ -33,7 +33,7 @@ public abstract class BaseHttpService
             foreach (var header in headers)
                 httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
         }
-        
+
         var response = await httpClient.GetAsync(method);
         if (!response.IsSuccessStatusCode)
         {
@@ -51,7 +51,7 @@ public abstract class BaseHttpService
         
             return result;
         }
-
+        
         return default;
     }
     

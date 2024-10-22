@@ -1,4 +1,3 @@
-using System.Net;
 using Common.CircuitBreaker;
 using Common.Models.DTO;
 using Gateway.RequestQueueService;
@@ -6,8 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Gateway.Services;
 
-public class RatingService : BaseHttpService, IRatingService
+public class RatingService : BaseHttpService, IRatingService, IRequestQueueUser
 {
+    public string Name => "rating";
+
     private readonly IRequestQueueService _queueService;
     
     public RatingService(
@@ -29,8 +30,7 @@ public class RatingService : BaseHttpService, IRatingService
                     {
                         { "X-User-Name", xUserName }
                     });
-            },
-            fallback: async () => new UserRatingResponse() { Stars = 10001 });
+            });
     }
 
     public async Task<UserRatingResponse?> IncreaseRating(string xUserName)
@@ -43,7 +43,7 @@ public class RatingService : BaseHttpService, IRatingService
             async () => await SendAsync<UserRatingResponse>(request),
             fallback: async () =>
             {
-                await _queueService.EnqueueRequestAsync("rating", request);
+                await _queueService.EnqueueRequestAsync(this, request);
                 return null;
             });
     }
@@ -58,12 +58,12 @@ public class RatingService : BaseHttpService, IRatingService
             async () => await SendAsync<UserRatingResponse>(request),
             fallback: async () =>
             {
-                await _queueService.EnqueueRequestAsync("rating", request);
+                await _queueService.EnqueueRequestAsync(this, request);
                 return null;
             });
     }
     
-    public async Task SendAsync(HttpRequestMessage request)
+    public async Task SendRequestAsync(HttpRequestMessage request)
     {
         await circuitBreaker.ExecuteCommandAsync<object>(
             async () =>
@@ -73,7 +73,7 @@ public class RatingService : BaseHttpService, IRatingService
             },
             fallback: async () =>
             {
-                await _queueService.EnqueueRequestAsync("rating", request);
+                await _queueService.EnqueueRequestAsync(this, request);
                 return null;
             });
     }

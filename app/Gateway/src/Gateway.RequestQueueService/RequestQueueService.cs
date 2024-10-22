@@ -1,12 +1,8 @@
 ﻿using System.Text.Json;
+using Gateway.Services;
 using StackExchange.Redis;
 
 namespace Gateway.RequestQueueService;
-
-public interface IRequestQueueService
-{
-    Task EnqueueRequestAsync(string serviceName, HttpRequestMessage request);
-}
 
 public class RequestQueueService : IRequestQueueService
 {
@@ -17,10 +13,10 @@ public class RequestQueueService : IRequestQueueService
         _redis = redis;
     }
 
-    public async Task EnqueueRequestAsync(string serviceName, HttpRequestMessage request)
+    public async Task EnqueueRequestAsync(IRequestQueueUser service, HttpRequestMessage request)
     {
         var requestDto = HttpRequestDto.FromHttpRequestMessage(request);
         var db = _redis.GetDatabase();
-        await db.ListRightPushAsync(serviceName, JsonSerializer.Serialize(requestDto));
+        await db.ListRightPushAsync(service.Name, JsonSerializer.Serialize(requestDto));
     }
 }

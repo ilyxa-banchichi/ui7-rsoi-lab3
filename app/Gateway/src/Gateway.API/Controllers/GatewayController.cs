@@ -225,15 +225,19 @@ public class GatewayController(
     [HttpGet("rating")]
     [ProducesResponseType(typeof(UserRatingResponse), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> GetUserRating([FromHeader(Name = "X-User-Name")][Required] string xUserName)
-    { 
+    {
         try
         {
             var response = await ratingService.GetUserRating(xUserName);
             return Ok(response);
         }
+        catch (HttpRequestException e)
+        {
+            return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
+        }
         catch (Exception e)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, e);
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
     }
     

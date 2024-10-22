@@ -1,6 +1,4 @@
 using System.Text.Json;
-using Common.CircuitBreaker;
-using Common.Models.DTO;
 using Gateway.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,16 +10,16 @@ public class RequestQueueJob : BackgroundService
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<RequestQueueJob> _logger;
-    private readonly IRatingService _ratingService;
+    private readonly IEnumerable<IRequestQueueUser> _services;
 
     public RequestQueueJob(
         IConnectionMultiplexer redis, 
         ILogger<RequestQueueJob> logger, 
-        IRatingService ratingService)
+        IEnumerable<IRequestQueueUser> services)
     {
         _redis = redis;
         _logger = logger;
-        _ratingService = ratingService;
+        _services = services;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -31,26 +29,25 @@ public class RequestQueueJob : BackgroundService
         {
             _logger.LogInformation($"Start dequeue");
 
-            await SendToRatingService(db);
+            foreach (var service in _services)
+                await SendToService(db, service);
             
             _logger.LogInformation("End dequeue");
             await Task.Delay(5000, stoppingToken);
         }
     }
 
-    private async Task SendToRatingService(IDatabase db)
+    private async Task SendToService(IDatabase db, IRequestQueueUser service)
     {
-        string serviceName = "rating";
+        _logger.LogInformation($"Service {service.Name}. Count {db.ListLength(service.Name)}");
         
-        _logger.LogInformation($"Count {db.ListLength(serviceName)}");
-        
-        var requestData = await db.ListLeftPopAsync(serviceName);
+        var requestData = await db.ListLeftPopAsync(service.Name);
         if (!requestData.IsNullOrEmpty)
         {
             var requestDto = JsonSerializer.Deserialize<HttpRequestDto>(requestData);
             var request = HttpRequestDto.FromDto(requestDto);
 
-            await _ratingService.SendAsync(request);
+            await service.SendRequestAsync(request);
         }
     }
 }

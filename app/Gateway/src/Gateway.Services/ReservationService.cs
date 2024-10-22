@@ -1,15 +1,28 @@
 using System.Net;
 using Common.CircuitBreaker;
 using Common.Models.DTO;
+using Gateway.RequestQueueService;
 using Microsoft.Extensions.Logging;
 
 namespace Gateway.Services;
 
-public class ReservationService(
-    IHttpClientFactory httpClientFactory, string baseUrl,
-    ICircuitBreaker circuitBreaker, ILogger<ReservationService> logger)
-    : BaseHttpService(httpClientFactory, baseUrl, circuitBreaker, logger), IReservationService
+public class ReservationService : BaseHttpService, IReservationService, IRequestQueueUser
 {
+    public string Name => "reservation";
+    
+    private readonly IRequestQueueService _queueService;
+
+    public ReservationService(
+        IHttpClientFactory httpClientFactory,
+        string baseUrl,
+        ICircuitBreaker circuitBreaker,
+        ILogger<ReservationService> logger,
+        IRequestQueueService queueService)
+        : base(httpClientFactory, baseUrl, circuitBreaker, logger)
+    {
+        _queueService = queueService;
+    }
+
     public async Task<List<RawBookReservationResponse>?> GetUserReservationsAsync(string xUserName)
     {
         var method = $"/api/v1/reservations";
@@ -44,5 +57,20 @@ public class ReservationService(
             
             throw;
         }
+    }
+
+    public async Task SendRequestAsync(HttpRequestMessage request)
+    {
+        await circuitBreaker.ExecuteCommandAsync<object>(
+            async () =>
+            {
+                await base.SendAsync(request);
+                return null;
+            },
+            fallback: async () =>
+            {
+                await _queueService.EnqueueRequestAsync(this, request);
+                return null;
+            });
     }
 }

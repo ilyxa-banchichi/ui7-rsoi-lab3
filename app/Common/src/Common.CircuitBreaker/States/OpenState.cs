@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.Extensions.Logging;
 
 namespace Common.CircuitBreaker.States;
@@ -22,7 +23,7 @@ public class OpenState : IState
         if (fallback != null)
             return await fallback();
 
-        throw new HttpRequestException("Blocked from CircuitBreaker");
+        throw new HttpRequestException(HttpRequestError.ConnectionError, "Blocked from CircuitBreaker", statusCode: HttpStatusCode.ServiceUnavailable);
     }
 
     public State TryDoTransition()
