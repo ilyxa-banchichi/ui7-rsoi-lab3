@@ -34,6 +34,29 @@ jobs:
         docker compose build
         docker compose push
 
+  Autograding:
+    needs: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: docker/setup-buildx-action@v2
+
+      - name: Run containers
+        timeout-minutes: 5
+        run: |
+          docker compose up -d
+          ./scripts/wait-script.sh
+        env:
+          WAIT_PORTS: 8080,8070,8060,8050
+
+      - name: Stop containers
+        if: always()
+        continue-on-error: true
+        run: docker compose down -v
+
   Deploy:
     needs: Publish
     runs-on: ubuntu-latest
@@ -88,36 +111,3 @@ jobs:
           cd ${{ env.APP_PATH }}
           docker compose down --rmi all
           docker compose up -d
-
-  Healthcheck:
-    needs: Deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Run healthcheck script
-        timeout-minutes: 5
-        run: ./scripts/wait-script.sh
-        env:
-          WAIT_PORTS: 8080,8070,8060,8050
-          HOST: ${{ secrets.HOST }}
-
-  Autograding:
-    needs: Healthcheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Run API Tests
-        uses: matt-ball/newman-action@master
-        with:
-          # TODO insert your variant
-          collection: v4/postman/collection.json
-          environment: v4/postman/environment.json
-          delayRequest: 100
-          reporters: '[ "cli" ]'
-
-      - uses: education/autograding@v1
-        id: autograder
-        continue-on-error: true
