@@ -39,6 +39,9 @@ public class GatewayController(
         }
         catch (HttpRequestException e)
         {
+            if (e.StatusCode == null)
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
+            
             return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
         }
         catch (Exception e)
@@ -67,6 +70,9 @@ public class GatewayController(
         }
         catch (HttpRequestException e)
         {
+            if (e.StatusCode == null)
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
+            
             return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
         }
         catch (Exception e)
@@ -117,6 +123,9 @@ public class GatewayController(
         }
         catch (HttpRequestException e)
         {
+            if (e.StatusCode == null)
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
+            
             return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
         }
         catch (Exception e)
@@ -179,6 +188,9 @@ public class GatewayController(
         }
         catch (HttpRequestException e)
         {
+            if (e.StatusCode == null)
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
+            
             return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
         }
         catch (Exception e)
@@ -230,6 +242,9 @@ public class GatewayController(
         }
         catch (HttpRequestException e)
         {
+            if (e.StatusCode == null)
+                return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
+            
             return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
         }
         catch (Exception e)
