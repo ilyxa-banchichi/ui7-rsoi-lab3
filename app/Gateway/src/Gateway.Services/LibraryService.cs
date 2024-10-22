@@ -27,34 +27,60 @@ public class LibraryService : BaseHttpService, ILibraryService, IRequestQueueUse
         string city, int page, int size)
     {
         var method = $"/api/v1/libraries?city={city}&page={page}&size={size}";
-        return await GetAsync<LibraryPaginationResponse>(method);
+        var request = new HttpRequestMessage(HttpMethod.Get, method);
+        
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<LibraryPaginationResponse>(request)
+        );
     }
 
     public async Task<LibraryBookPaginationResponse?> GetBooksInLibraryAsync(
         string libraryUid, int page, int size, bool showAll = false)
     {
         var method = $"/api/v1/libraries/{libraryUid}/books?page={page}&size={size}&showAll={showAll}";
-        return await GetAsync<LibraryBookPaginationResponse>(method);
+        var request = new HttpRequestMessage(HttpMethod.Get, method);
+        
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<LibraryBookPaginationResponse>(request)
+        );
     }
 
     public async Task<List<LibraryResponse>?> GetLibrariesListAsync(IEnumerable<Guid> librariesUid)
     {
         var method = $"/api/v1/libraries/list";
-        return await GetAsync<List<LibraryResponse>>(method,
-            new Dictionary<string, string>()
+        var request = new HttpRequestMessage(HttpMethod.Get, method);
+        request.Headers.Add("librariesUid", string.Join(", ", librariesUid));
+        
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<List<LibraryResponse>>(request),
+            fallback: async () =>
             {
-                { "librariesUid", string.Join(", ", librariesUid) }
-            });
+                var fallback = new List<LibraryResponse>(librariesUid.Count());
+                foreach (var guid in librariesUid)
+                    fallback.Add(new LibraryResponse() { LibraryUid = guid.ToString() });
+                
+                return fallback;
+            }
+        );
     }
 
     public async Task<List<BookInfo>?> GetBooksListAsync(IEnumerable<Guid> booksUid)
     {
         var method = $"/api/v1/libraries/books/list";
-        return await GetAsync<List<BookInfo>>(method,
-            new Dictionary<string, string>()
+        var request = new HttpRequestMessage(HttpMethod.Get, method);
+        request.Headers.Add("booksUid", string.Join(", ", booksUid));
+        
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<List<BookInfo>>(request),
+            fallback: async () =>
             {
-                { "booksUid", string.Join(", ", booksUid) }
-            });
+                var fallback = new List<BookInfo>(booksUid.Count());
+                foreach (var guid in booksUid)
+                    fallback.Add(new BookInfo() { BookUid = guid });
+                
+                return fallback;
+            }
+        );
     }
     
     public async Task<bool> TakeBookAsync(Guid libraryUid, Guid bookUid)

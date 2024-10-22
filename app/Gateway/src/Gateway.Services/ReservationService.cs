@@ -26,11 +26,12 @@ public class ReservationService : BaseHttpService, IReservationService, IRequest
     public async Task<List<RawBookReservationResponse>?> GetUserReservationsAsync(string xUserName)
     {
         var method = $"/api/v1/reservations";
-        return await GetAsync<List<RawBookReservationResponse>>(method,
-            new Dictionary<string, string>()
-            {
-                { "X-User-Name", xUserName }
-            });
+        var request = new HttpRequestMessage(HttpMethod.Get, method);
+        request.Headers.Add("X-User-Name", xUserName);
+
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<List<RawBookReservationResponse>>(request)
+        );
     }
 
     public async Task<RawBookReservationResponse?> TakeBook(string xUserName, TakeBookRequest body)
@@ -64,7 +65,7 @@ public class ReservationService : BaseHttpService, IReservationService, IRequest
         await circuitBreaker.ExecuteCommandAsync<object>(
             async () =>
             {
-                await base.SendAsync(request);
+                await SendAsync(request);
                 return null;
             },
             fallback: async () =>

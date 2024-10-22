@@ -36,9 +36,13 @@ public class GatewayController(
             var response = await libraryService.GetLibrariesInCityAsync(city, page, size);
             return Ok(response);
         }
+        catch (HttpRequestException e)
+        {
+            return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
+        }
         catch (Exception e)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, e);
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
     }
     
@@ -60,9 +64,13 @@ public class GatewayController(
             var response = await libraryService.GetBooksInLibraryAsync(libraryUid, page, size, showAll);
             return Ok(response);
         }
+        catch (HttpRequestException e)
+        {
+            return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
+        }
         catch (Exception e)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, e);
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
     }
     
@@ -106,9 +114,13 @@ public class GatewayController(
             
             return Ok(reservations);
         }
+        catch (HttpRequestException e)
+        {
+            return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
+        }
         catch (Exception e)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, e);
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
     }
     
@@ -164,9 +176,13 @@ public class GatewayController(
             
             return Ok(response);
         }
+        catch (HttpRequestException e)
+        {
+            return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
+        }
         catch (Exception e)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, e);
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
     }
     
@@ -211,9 +227,13 @@ public class GatewayController(
             
             return Ok(null);
         }
+        catch (HttpRequestException e)
+        {
+            return StatusCode((int)(e.StatusCode ?? HttpStatusCode.ServiceUnavailable), e.Message);
+        }
         catch (Exception e)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, e);
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
     }
     
@@ -238,21 +258,6 @@ public class GatewayController(
         catch (Exception e)
         {
             return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
-        }
-    }
-    
-    [HttpPost("test")]
-    [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
-    public async Task<IActionResult> ReturnBook()
-    {
-        try
-        {
-            await ratingService.IncreaseRating("Jopa");
-            return Ok(null);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, e);
         }
     }
 }

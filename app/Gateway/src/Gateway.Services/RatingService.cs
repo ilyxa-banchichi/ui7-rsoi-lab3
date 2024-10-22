@@ -22,15 +22,13 @@ public class RatingService : BaseHttpService, IRatingService, IRequestQueueUser
 
     public async Task<UserRatingResponse?> GetUserRating(string xUserName)
     {
-        return await circuitBreaker.ExecuteCommandAsync(async () =>
-            {
-                var method = $"/api/v1/rating";
-                return await GetAsync<UserRatingResponse>(method,
-                    new Dictionary<string, string>()
-                    {
-                        { "X-User-Name", xUserName }
-                    });
-            });
+        var method = $"/api/v1/rating";
+        var request = new HttpRequestMessage(HttpMethod.Get, method);
+        request.Headers.Add("X-User-Name", xUserName);
+
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<UserRatingResponse>(request)
+        );
     }
 
     public async Task<UserRatingResponse?> IncreaseRating(string xUserName)
@@ -45,7 +43,8 @@ public class RatingService : BaseHttpService, IRatingService, IRequestQueueUser
             {
                 await _queueService.EnqueueRequestAsync(this, request);
                 return null;
-            });
+            }
+        );
     }
 
     public async Task<UserRatingResponse?> DecreaseRating(string xUserName)
@@ -60,7 +59,8 @@ public class RatingService : BaseHttpService, IRatingService, IRequestQueueUser
             {
                 await _queueService.EnqueueRequestAsync(this, request);
                 return null;
-            });
+            }
+        );
     }
     
     public async Task SendRequestAsync(HttpRequestMessage request)
@@ -68,13 +68,14 @@ public class RatingService : BaseHttpService, IRatingService, IRequestQueueUser
         await circuitBreaker.ExecuteCommandAsync<object>(
             async () =>
             {
-                await base.SendAsync(request);
+                await SendAsync(request);
                 return null;
             },
             fallback: async () =>
             {
                 await _queueService.EnqueueRequestAsync(this, request);
                 return null;
-            });
+            }
+        );
     }
 }
