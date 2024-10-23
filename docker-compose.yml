@@ -34,6 +34,8 @@ services:
   gateway:
     image: ilyxabanchichi/rsoi-lab3-gateway:latest
     restart: always
+    env_file:
+      - .env
     build:
       context: ./app
       dockerfile: ./Gateway/Dockerfile
@@ -56,6 +58,8 @@ services:
   library-service:
     image: ilyxabanchichi/rsoi-lab3-library-service:latest
     restart: always
+    env_file:
+      - .env
     build:
       context: ./app
       dockerfile: ./LibraryService/Dockerfile
@@ -76,17 +80,13 @@ services:
   reservation-service:
     image: ilyxabanchichi/rsoi-lab3-reservation-service:latest
     restart: always
+    env_file:
+      - .env
     build:
-      context: ./app
-      dockerfile: ./ReservationService/Dockerfile
-      args:
-        BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
-    environment:
-      - ASPNETCORE_URLS=http://+:8070
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=reservations;Username=program;Password=test
+      context: ./app/reservation-service
+      dockerfile: ./Dockerfile
     ports:
-      - 8070:8070
+      - ${ReservationService__PORT}:80
     depends_on:
       - postgres
     networks:
@@ -96,6 +96,8 @@ services:
   rating-service:
     image: ilyxabanchichi/rsoi-lab3-rating-service:latest
     restart: always
+    env_file:
+      - .env
     build:
       context: ./app
       dockerfile: ./RatingService/Dockerfile

@@ -7,7 +7,6 @@ on:
     branches:
       - master
 env:
-  BUILD_CONFIGURATION: Debug
   APP_PATH: /home/${{ secrets.SSH_USER_NAME }}/lab2
 
 jobs:
@@ -28,8 +27,6 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push Docker images
-      env:
-        BUILD_CONFIGURATION: ${{ env.BUILD_CONFIGURATION }}
       run: |
         docker compose build
         docker compose push
