@@ -138,7 +138,8 @@ public class GatewayController(
     [ProducesResponseType(typeof(TakeBookResponse), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(List<BookReservationResponse>), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> TakeBook(
-        [FromHeader(Name = "X-User-Name")][Required] string xUserName, [FromBody][Required] TakeBookRequest body)
+        [FromHeader(Name = "X-User-Name")][Required] string xUserName, 
+        [FromBody][Required] TakeBookRequest body)
     {
         try
         {
