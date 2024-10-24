@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Common.CircuitBreaker;
 
@@ -9,10 +10,12 @@ public class CircuitBreaker<TService> : ICircuitBreaker<TService>
 
     private IState _state;
 
-    public CircuitBreaker(ILogger<CircuitBreaker<TService>> logger)
+    public CircuitBreaker(
+        ILogger<CircuitBreaker<TService>> logger,
+        IOptions<CircuitBreakerConfig> config)
     {
         _logger = logger;
-        _stateFactory = new CircuitBreakerStateFactory(logger);
+        _stateFactory = new CircuitBreakerStateFactory(logger, config.Value);
         _state = _stateFactory.Create(State.Close);
     }
 

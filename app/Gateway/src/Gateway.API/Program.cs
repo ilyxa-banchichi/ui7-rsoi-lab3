@@ -75,6 +75,9 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddTransient<IRequestQueueService, RequestQueueService>();
 builder.Services.AddHostedService<RequestQueueJob>();
 
+builder.Services.Configure<RequestQueueConfig>(builder.Configuration.GetSection("RequestQueueConfig"));
+builder.Services.Configure<CircuitBreakerConfig>(builder.Configuration.GetSection("CircuitBreakerConfig"));
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
