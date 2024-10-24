@@ -1,4 +1,6 @@
 using System.Net;
+using System.Text;
+using System.Text.Json;
 using Common.CircuitBreaker;
 using Common.Models.DTO;
 using Gateway.RequestQueueService;
@@ -39,6 +41,8 @@ public class ReservationService : BaseHttpService, IReservationService, IRequest
         var method = $"/api/v1/reservations";
         var request = new HttpRequestMessage(HttpMethod.Post, method);
         request.Headers.Add("X-User-Name", xUserName);
+        string jsonBody = JsonSerializer.Serialize(body);
+        request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
         
         return await circuitBreaker.ExecuteCommandAsync(
             async () => await SendAsync<RawBookReservationResponse>(request)
