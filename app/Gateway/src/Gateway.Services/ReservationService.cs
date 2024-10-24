@@ -37,27 +37,22 @@ public class ReservationService : BaseHttpService, IReservationService, IRequest
     public async Task<RawBookReservationResponse?> TakeBook(string xUserName, TakeBookRequest body)
     {
         var method = $"/api/v1/reservations";
-        return await PostAsync<RawBookReservationResponse>(method, body,
-            new Dictionary<string, string>()
-            {
-                { "X-User-Name", xUserName }
-            });
+        var request = new HttpRequestMessage(HttpMethod.Post, method);
+        request.Headers.Add("X-User-Name", xUserName);
+        
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<RawBookReservationResponse>(request)
+        );
     }
     
     public async Task<RawBookReservationResponse?> ReturnBook(Guid reservationUid, DateOnly date)
     {
-        try
-        {
-            var method = $"/api/v1/reservations/{reservationUid}/return";
-            return await PatchAsync<RawBookReservationResponse>(method, date);
-        }
-        catch (HttpRequestException ex)
-        {
-            if (ex.StatusCode == HttpStatusCode.NotFound)
-                return null;
-            
-            throw;
-        }
+        var method = $"/api/v1/reservations/{reservationUid}/return";
+        var request = new HttpRequestMessage(HttpMethod.Patch, method);
+        
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<RawBookReservationResponse>(request)
+        );
     }
 
     public async Task SendRequestAsync(HttpRequestMessage request)

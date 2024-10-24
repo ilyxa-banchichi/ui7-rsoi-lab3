@@ -39,12 +39,10 @@ services:
       dockerfile: ./Gateway/Dockerfile
       args:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
+    env_file:
+      - ./.env/gateway.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__RatingService=http://rating-service:8050
-      - ConnectionStrings__LibraryService=http://library-service:8060
-      - ConnectionStrings__ReservationService=http://reservation-service:8070
-      - ConnectionStrings__RedisQueue=redis:6379,password=redis_pass,abortConnect=false
     ports:
       - 8080:8080
     networks:
