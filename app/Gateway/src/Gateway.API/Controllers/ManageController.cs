@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Gateway.API.Controllers;
 
-[Route("")]
+[Route("manage")]
 [ApiController]
 public class ManageController : Controller
 {
