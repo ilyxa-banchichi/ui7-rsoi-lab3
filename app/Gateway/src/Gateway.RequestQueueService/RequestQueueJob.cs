@@ -33,7 +33,7 @@ public class RequestQueueJob : BackgroundService
                 await SendToService(db, service);
             
             _logger.LogInformation("End dequeue");
-            await Task.Delay(5000, stoppingToken);
+            await Task.Delay(1000, stoppingToken);
         }
     }
 
