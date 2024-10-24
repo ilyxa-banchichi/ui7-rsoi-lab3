@@ -18,7 +18,7 @@ public class CircuitBreakerStateFactory : ICircuitBreakerStateFactory
         {
             State.None => throw new ArgumentOutOfRangeException(nameof(state), state, null),
             State.Close => new CloseState(_logger, 1),
-            State.Open => new OpenState(_logger, 10),
+            State.Open => new OpenState(_logger, 1),
             State.HalfOpen => new HalfOpenState(_logger, 1),
             _ => throw new ArgumentOutOfRangeException(nameof(state), state, null)
         };
