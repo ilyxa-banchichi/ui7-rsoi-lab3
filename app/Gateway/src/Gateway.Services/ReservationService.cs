@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Common.CircuitBreaker;
@@ -41,8 +42,7 @@ public class ReservationService : BaseHttpService, IReservationService, IRequest
         var method = $"/api/v1/reservations";
         var request = new HttpRequestMessage(HttpMethod.Post, method);
         request.Headers.Add("X-User-Name", xUserName);
-        string jsonBody = JsonSerializer.Serialize(body);
-        request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+        request.Content = JsonContent.Create(body);
         
         return await circuitBreaker.ExecuteCommandAsync(
             async () => await SendAsync<RawBookReservationResponse>(request)
@@ -53,6 +53,7 @@ public class ReservationService : BaseHttpService, IReservationService, IRequest
     {
         var method = $"/api/v1/reservations/{reservationUid}/return";
         var request = new HttpRequestMessage(HttpMethod.Patch, method);
+        request.Content = JsonContent.Create(date);
         
         return await circuitBreaker.ExecuteCommandAsync(
             async () => await SendAsync<RawBookReservationResponse>(request)
