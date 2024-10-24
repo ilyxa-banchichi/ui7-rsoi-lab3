@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
-using System.Text.Json;
 using Common.Models.DTO;
 using Common.Models.Enums;
 using Gateway.Common.Models.DTO;
@@ -15,12 +14,6 @@ public class GatewayController(
     ILibraryService libraryService, IReservationService reservationService,
     IRatingService ratingService) : Controller
 {
-    [HttpGet("/manage/health")]
-    public IActionResult Health()
-    {
-        return Ok();
-    }
-    
     /// <summary>
     /// Получить список библиотек в городе
     /// </summary>
