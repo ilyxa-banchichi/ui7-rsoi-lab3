@@ -82,6 +82,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Stop containers
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        script: |
+            cd ${{ env.APP_PATH }}
+            docker compose down --rmi all
+
     - name: Clear app directory
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -138,7 +150,7 @@ jobs:
         source: ./env
         target: ${{ env.APP_PATH }}
 
-    - name: Start container
+    - name: Create env
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.HOST }}
@@ -150,7 +162,7 @@ jobs:
             cd ${{ env.APP_PATH }}
             touch .env && echo -e "ASPNETCORE_ENVIRONMENT=${{env.ASPNETCORE_ENVIRONMENT}}\nGATEWAY_PORT=${{ env.GATEWAY_PORT }}\nRATING_PORT=${{ env.RATING_PORT }}\nLIBRARY_PORT=${{ env.LIBRARY_PORT }}\nRESERVATION_PORT=${{ env.RESERVATION_PORT }}\n" > .env
 
-    - name: Start container
+    - name: Start containers
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.HOST }}
@@ -160,5 +172,4 @@ jobs:
         port: 22
         script: |
             cd ${{ env.APP_PATH }}
-            docker compose down --rmi all
             docker compose up -d

@@ -59,6 +59,8 @@ services:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
     env_file:
       - ./env/library-service.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
     ports:
       - ${LIBRARY_PORT}:${LIBRARY_PORT}
     depends_on:
@@ -77,6 +79,8 @@ services:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
     env_file:
       - ./env/reservation-service.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
     ports:
       - ${RESERVATION_PORT}:${RESERVATION_PORT}
     depends_on:
@@ -95,6 +99,8 @@ services:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
     env_file:
       - ./env/rating-service.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
     ports:
       - ${RATING_PORT}:${RATING_PORT}
     depends_on:
