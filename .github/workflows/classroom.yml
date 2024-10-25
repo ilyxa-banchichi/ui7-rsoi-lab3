@@ -8,6 +8,7 @@ on:
       - master
 env:
   BUILD_CONFIGURATION: Debug
+  ASPNETCORE_ENVIRONMENT: Development
   APP_PATH: /home/${{ secrets.SSH_USER_NAME }}/lab2
 
 jobs:
