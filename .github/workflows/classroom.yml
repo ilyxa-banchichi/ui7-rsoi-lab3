@@ -10,6 +10,10 @@ env:
   BUILD_CONFIGURATION: Debug
   ASPNETCORE_ENVIRONMENT: Development
   APP_PATH: /home/${{ secrets.SSH_USER_NAME }}/lab2
+  GATEWAY_PORT: 8080
+  LIBRARY_PORT: 8060
+  RATING_PORT: 8050
+  RESERVATION: PORT=8070
 
 jobs:
   Autograding:

@@ -5,7 +5,7 @@ services:
     container_name: postgres
     restart: on-failure
     env_file:
-      - ./.env/postgres.env
+      - ./env/postgres.env
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./postgres/:/docker-entrypoint-initdb.d/
@@ -18,7 +18,7 @@ services:
     image: redis:latest
     container_name: redis
     env_file:
-      - ./.env/redis.env
+      - ./env/redis.env
     volumes:
       - redis-data:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
@@ -38,9 +38,9 @@ services:
       args:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
     env_file:
-      - ./.env/gateway.env
+      - ./env/gateway.env
     ports:
-      - ${Port}:${Port}
+      - ${GATEWAY_PORT}:${GATEWAY_PORT}
     networks:
       - library-local
       - reservation-local
@@ -56,9 +56,9 @@ services:
       args:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
     env_file:
-      - ./.env/library-service.env
+      - ./env/library-service.env
     ports:
-      - ${Port}:${Port}
+      - ${LIBRARY_PORT}:${LIBRARY_PORT}
     depends_on:
       - postgres
     networks:
@@ -74,9 +74,9 @@ services:
       args:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
     env_file:
-      - ./.env/reservation-service.env
+      - ./env/reservation-service.env
     ports:
-      - ${Port}:${Port}
+      - ${RESERVATION_PORT}:${RESERVATION_PORT}
     depends_on:
       - postgres
     networks:
@@ -92,9 +92,9 @@ services:
       args:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
     env_file:
-      - ./.env/rating-service.env
+      - ./env/rating-service.env
     ports:
-      - ${Port}:${Port}
+      - ${RATING_PORT}:${RATING_PORT}
     depends_on:
       - postgres
     networks:
