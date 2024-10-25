@@ -63,6 +63,25 @@ public class ReservationsController(IReservationsRepository reservationsReposito
             return StatusCode(StatusCodes.Status500InternalServerError, e);
         }
     }
+
+    /// <summary>
+    /// Откат взятия книги в библиотеке
+    /// </summary>
+    [HttpDelete("{reservationUid}/rollback")]
+
+    [ProducesResponseType(typeof(RawBookReservationResponse), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> TakeBookRollback([FromRoute][Required] string reservationUid)
+    {
+        try
+        {
+            await reservationsRepository.RemoveReservationAsync(Guid.Parse(reservationUid));
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, e);
+        }
+    }
     
     /// <summary>
     /// Вернуть книгу

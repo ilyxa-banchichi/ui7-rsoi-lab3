@@ -1,7 +1,9 @@
+using System.Net.Http.Json;
 using Common.CircuitBreaker;
 using Common.Models.DTO;
 using Common.Models.Enums;
 using Gateway.RequestQueueService;
+using Gateway.Services.Exceptions;
 using Microsoft.Extensions.Logging;
 
 namespace Gateway.Services;
@@ -83,21 +85,35 @@ public class LibraryService : BaseHttpService, ILibraryService, IRequestQueueUse
         );
     }
     
-    public async Task<bool> TakeBookAsync(Guid libraryUid, Guid bookUid)
+    public async Task TakeBookAsync(Guid libraryUid, Guid bookUid)
     {
         var method = $"/api/v1/libraries/{libraryUid}/books/{bookUid}";
-        return await PatchAsync<bool>(method);
+        var request = new HttpRequestMessage(HttpMethod.Patch, method);
+        
+        await circuitBreaker.ExecuteCommandAsync<object?>(
+            async () =>
+            {
+                await SendAsync<object>(request);
+                return null;
+            },
+            fallback: () => throw new LibraryServiceUnavailableException());
     }
 
-    public async Task<UpdateBookConditionResponse?> ReturnBookAsync(Guid libraryUid, Guid bookUid, BookCondition condition)
+    public async Task<UpdateBookConditionResponse?> ReturnBookAsync(
+        Guid libraryUid, Guid bookUid, BookCondition condition)
     {
         var method = $"/api/v1/libraries/{libraryUid}/books/{bookUid}/return";
-        return await PatchAsync<UpdateBookConditionResponse>(method, body: condition);
+        var request = new HttpRequestMessage(HttpMethod.Patch, method);
+        request.Content = JsonContent.Create(condition);
+        
+        return await circuitBreaker.ExecuteCommandAsync(
+            async () => await SendAsync<UpdateBookConditionResponse>(request)
+        );  
     }
 
     public async Task SendRequestAsync(HttpRequestMessage request)
     {
-        await circuitBreaker.ExecuteCommandAsync<object>(
+        await circuitBreaker.ExecuteCommandAsync<object?>(
             async () =>
             {
                 await base.SendAsync(request);

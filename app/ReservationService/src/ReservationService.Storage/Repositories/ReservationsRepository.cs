@@ -48,4 +48,16 @@ public class ReservationsRepository(PostgresContext db) : IReservationsRepositor
         await db.SaveChangesAsync();
         return reservation;
     }
+
+    public async Task RemoveReservationAsync(Guid reservationUid)
+    {
+        var reservation = await db.Reservations
+            .FirstOrDefaultAsync(r => r.ReservationUid == reservationUid);
+        
+        if (reservation == null)
+            return;
+
+        db.Reservations.Remove(reservation);
+        await db.SaveChangesAsync();
+    }
 }

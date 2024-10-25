@@ -65,7 +65,7 @@ public class RatingService : BaseHttpService, IRatingService, IRequestQueueUser
     
     public async Task SendRequestAsync(HttpRequestMessage request)
     {
-        await circuitBreaker.ExecuteCommandAsync<object>(
+        await circuitBreaker.ExecuteCommandAsync<object?>(
             async () =>
             {
                 await SendAsync(request);

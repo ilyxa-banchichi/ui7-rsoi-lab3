@@ -10,4 +10,5 @@ public interface IReservationsRepository
         string userName, Guid bookUid, Guid libraryUid, DateOnly tillDate);
 
     Task<Reservation?> ReturnBookAsync(Guid reservationUid, DateOnly tillDate);
+    Task RemoveReservationAsync(Guid reservationUid);
 }

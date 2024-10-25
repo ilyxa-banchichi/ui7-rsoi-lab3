@@ -4,6 +4,7 @@ using Common.Models.DTO;
 using Common.Models.Enums;
 using Gateway.Common.Models.DTO;
 using Gateway.Services;
+using Gateway.Services.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gateway.API.Controllers;
@@ -141,26 +142,25 @@ public class GatewayController(
         [FromHeader(Name = "X-User-Name")][Required] string xUserName, 
         [FromBody][Required] TakeBookRequest body)
     {
+        RawBookReservationResponse? reservation = null;
         try
         {
             var rawReservations = await reservationService.GetUserReservationsAsync(xUserName);
             var rentedCount = rawReservations.Count(r => r.Status == ReservationStatus.RENTED);
-            
+
             var userRating = await ratingService.GetUserRating(xUserName);
             var maxRentedCount = Math.Ceiling((double)(userRating.Stars / 10));
-            
+
             if (rentedCount > maxRentedCount)
                 return Ok(null);
-            
-            var isBookTaken = await libraryService.TakeBookAsync(body.LibraryUid, body.BookUid);
-            if (!isBookTaken)
-                return Ok(null);
 
-            var reservation = await reservationService.TakeBook(xUserName, body);
+            reservation = await reservationService.TakeBook(xUserName, body);
+
+            await libraryService.TakeBookAsync(body.LibraryUid, body.BookUid);
 
             var library = (await libraryService.GetLibrariesListAsync(new[] { body.LibraryUid }))[0];
             var book = (await libraryService.GetBooksListAsync(new[] { body.BookUid }))[0];
-            
+
             var response = new TakeBookResponse()
             {
                 ReservationUid = reservation.ReservationUid,
@@ -177,8 +177,15 @@ public class GatewayController(
                 Library = library,
                 Rating = userRating,
             };
-            
+
             return Ok(response);
+        }
+        catch (LibraryServiceUnavailableException e)
+        {
+            if (reservation != null)
+                await reservationService.TakeBookRollback(reservation.ReservationUid);
+            
+            return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Library Service unavailable" });
         }
         catch (HttpRequestException e)
         {

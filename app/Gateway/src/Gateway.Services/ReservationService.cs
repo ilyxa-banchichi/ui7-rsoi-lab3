@@ -1,7 +1,4 @@
-using System.Net;
 using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
 using Common.CircuitBreaker;
 using Common.Models.DTO;
 using Gateway.RequestQueueService;
@@ -49,6 +46,25 @@ public class ReservationService : BaseHttpService, IReservationService, IRequest
         );
     }
     
+    public async Task TakeBookRollback(Guid reservationGuid)
+    {
+        var method = $"/api/v1/reservations/{reservationGuid}/rollback";
+        var request = new HttpRequestMessage(HttpMethod.Delete, method);
+        
+        await circuitBreaker.ExecuteCommandAsync<object?>(
+            async () =>
+            {
+                await SendAsync(request);
+                return null;
+            },
+            fallback: async () =>
+            {
+                await _queueService.EnqueueRequestAsync(this, request);
+                return null;
+            }
+        );
+    }
+    
     public async Task<RawBookReservationResponse?> ReturnBook(Guid reservationUid, DateOnly date)
     {
         var method = $"/api/v1/reservations/{reservationUid}/return";
@@ -62,7 +78,7 @@ public class ReservationService : BaseHttpService, IReservationService, IRequest
 
     public async Task SendRequestAsync(HttpRequestMessage request)
     {
-        await circuitBreaker.ExecuteCommandAsync<object>(
+        await circuitBreaker.ExecuteCommandAsync<object?>(
             async () =>
             {
                 await SendAsync(request);
