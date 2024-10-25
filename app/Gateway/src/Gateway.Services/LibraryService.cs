@@ -107,7 +107,18 @@ public class LibraryService : BaseHttpService, ILibraryService, IRequestQueueUse
         request.Content = JsonContent.Create(condition);
         
         return await circuitBreaker.ExecuteCommandAsync(
-            async () => await SendAsync<UpdateBookConditionResponse>(request)
+            async () => await SendAsync<UpdateBookConditionResponse?>(request),
+            fallback: async () =>
+            {
+                await _queueService.EnqueueRequestAsync(this, request);
+                return new UpdateBookConditionResponse()
+                {
+                    LibraryUid = libraryUid,
+                    BookUid = bookUid,
+                    NewCondition = condition,
+                    OldCondition = condition,
+                };
+            }
         );  
     }
 
