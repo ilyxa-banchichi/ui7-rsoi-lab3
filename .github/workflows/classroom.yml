@@ -8,8 +8,14 @@ on:
       - master
 env:
   APP_PATH: /home/${{ secrets.SSH_USER_NAME }}/lab2
+
   ASPNETCORE_ENVIRONMENT: Development
   BUILD_CONFIGURATION: Debug
+
+  GATEWAY_PORT: ${{ vars.GATEWAY_PORT }}
+  LIBRARY_PORT: ${{ vars.LIBRARY_PORT }}
+  RATING_PORT: ${{ vars.RATING_PORT }}
+  RESERVATION_PORT: ${{ vars.RESERVATION_PORT }}
 
 jobs:
   Autograding:
@@ -64,8 +70,6 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push Docker images
-      env:
-        BUILD_CONFIGURATION: ${{ env.BUILD_CONFIGURATION }}
       run: |
         docker compose build
         docker compose push
