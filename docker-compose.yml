@@ -39,6 +39,8 @@ services:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
     env_file:
       - ./env/gateway.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
     ports:
       - ${GATEWAY_PORT}:${GATEWAY_PORT}
     networks:
