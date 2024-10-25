@@ -7,9 +7,11 @@ on:
     branches:
       - master
 env:
-  BUILD_CONFIGURATION: Debug
-  ASPNETCORE_ENVIRONMENT: Development
   APP_PATH: /home/${{ secrets.SSH_USER_NAME }}/lab2
+
+  ASPNETCORE_ENVIRONMENT: Development
+  BUILD_CONFIGURATION: Debug
+
   GATEWAY_PORT: 8080
   LIBRARY_PORT: 8060
   RATING_PORT: 8050
