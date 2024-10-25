@@ -148,7 +148,7 @@ jobs:
         port: 22
         script: |
             cd ${{ env.APP_PATH }}
-            touch .env && echo -e "GATEWAY_PORT=${{ env.GATEWAY_PORT }}\nRATING_PORT=${{ env.RATING_PORT }}\nLIBRARY_PORT=${{ env.LIBRARY_PORT }}\nRESERVATION_PORT=${{ env.RESERVATION_PORT }}\n" > .env
+            touch .env && echo -e "ASPNETCORE_ENVIRONMENT=${{env.ASPNETCORE_ENVIRONMENT}}\nGATEWAY_PORT=${{ env.GATEWAY_PORT }}\nRATING_PORT=${{ env.RATING_PORT }}\nLIBRARY_PORT=${{ env.LIBRARY_PORT }}\nRESERVATION_PORT=${{ env.RESERVATION_PORT }}\n" > .env
 
     - name: Start container
       uses: appleboy/ssh-action@v1.0.3
