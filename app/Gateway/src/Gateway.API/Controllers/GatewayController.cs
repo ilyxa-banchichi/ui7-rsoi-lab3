@@ -36,7 +36,7 @@ public class GatewayController(
             if (e.StatusCode == null || e.StatusCode == HttpStatusCode.ServiceUnavailable)
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
 
-            throw;
+            return StatusCode((int)e.StatusCode, e.Message);
         }
         catch (Exception e)
         {
@@ -67,7 +67,7 @@ public class GatewayController(
             if (e.StatusCode == null || e.StatusCode == HttpStatusCode.ServiceUnavailable)
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
 
-            throw;
+            return StatusCode((int)e.StatusCode, e.Message);
         }
         catch (Exception e)
         {
@@ -120,7 +120,7 @@ public class GatewayController(
             if (e.StatusCode == null || e.StatusCode == HttpStatusCode.ServiceUnavailable)
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
 
-            throw;
+            return StatusCode((int)e.StatusCode, e.Message);
         }
         catch (Exception e)
         {
@@ -192,7 +192,7 @@ public class GatewayController(
             if (e.StatusCode == null || e.StatusCode == HttpStatusCode.ServiceUnavailable)
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
 
-            throw;
+            return StatusCode((int)e.StatusCode, e.Message);
         }
         catch (Exception e)
         {
@@ -246,7 +246,7 @@ public class GatewayController(
             if (e.StatusCode == null || e.StatusCode == HttpStatusCode.ServiceUnavailable)
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
 
-            throw;
+            return StatusCode((int)e.StatusCode, e.Message);
         }
         catch (Exception e)
         {
@@ -272,8 +272,8 @@ public class GatewayController(
         {
             if (e.StatusCode == null || e.StatusCode == HttpStatusCode.ServiceUnavailable)
                 return StatusCode((int)HttpStatusCode.ServiceUnavailable, new { Message = "Bonus Service unavailable" });
-
-            throw;
+            
+            return StatusCode((int)e.StatusCode, e.Message);
         }
         catch (Exception e)
         {
