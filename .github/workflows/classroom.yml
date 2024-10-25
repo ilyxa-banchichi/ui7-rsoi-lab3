@@ -75,7 +75,89 @@ jobs:
         docker compose push
 
   Deploy:
-    needs: Publish
-    uses: ./.github/workflows/deploy-reusable.yml
-    with:
-      branch: master
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Clear app directory
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        script: |
+            rm -rf ${{ env.APP_PATH }}
+            mkdir -p ${{ env.APP_PATH }}
+
+    - name: Copy docker-compose file
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        source: ./docker-compose.yml
+        target: ${{ env.APP_PATH }}
+
+    - name: Copy postgres configs
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        source: ./postgres
+        target: ${{ env.APP_PATH }}
+
+    - name: Copy redis configs
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        source: ./redis
+        target: ${{ env.APP_PATH }}
+
+    - name: Copy env files
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        source: ./env
+        target: ${{ env.APP_PATH }}
+
+    - name: Start container
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        script: |
+            cd ${{ env.APP_PATH }}
+            touch .env && echo -e "GATEWAY_PORT=${{ env.GATEWAY_PORT }}\nRATING_PORT=${{ env.RATING_PORT }}\nLIBRARY_PORT=${{ env.LIBRARY_PORT }}\nRESERVATION_PORT=${{ env.RESERVATION_PORT }}\n" > .env
+
+    - name: Start container
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        script: |
+            cd ${{ env.APP_PATH }}
+            docker compose down --rmi all
+            docker compose up -d
