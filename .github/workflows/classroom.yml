@@ -115,6 +115,18 @@ jobs:
         port: 22
         source: ./postgres
         target: ${{ env.APP_PATH }}
+
+    - name: Copy redis configs
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER_NAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASS }}
+        port: 22
+        source: ./redis
+        target: ${{ env.APP_PATH }}
+
     - name: Copy env files
       uses: appleboy/scp-action@v0.1.7
       with:
@@ -123,7 +135,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASS }}
         port: 22
-        source: ./.env
+        source: ./env
         target: ${{ env.APP_PATH }}
 
     - name: Start container
