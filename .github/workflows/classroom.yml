@@ -75,6 +75,7 @@ jobs:
         docker compose push
 
   Deploy:
+    needs: Publish
     runs-on: ubuntu-latest
 
     steps:
