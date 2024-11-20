@@ -70,6 +70,10 @@ builder.Services.AddTransient<IRatingService, RatingService>(provider => GetRati
 builder.Services.AddTransient<IRequestQueueUser, RatingService>(provider => GetRatingService(provider));
 
 var redisConnection = builder.Configuration.GetConnectionString("RedisQueue");
+Console.WriteLine(redisConnection);
+if (redisConnection == null)
+    redisConnection = "redis-master:6379,password=redis_pass,abortConnect=false";
+
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnection));
 
 builder.Services.AddTransient<IRequestQueueService, RequestQueueService>();
