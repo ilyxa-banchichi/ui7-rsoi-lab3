@@ -36,7 +36,7 @@ var GetLibraryService = (IServiceProvider provider) =>
 {
     return new LibraryService(
         httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(), 
-        baseUrl: builder.Configuration.GetConnectionString("LibraryService"),
+        baseUrl: Environment.GetEnvironmentVariable("ConnectionStrings__LibraryService"),
         circuitBreaker: provider.GetRequiredService<ICircuitBreaker<ILibraryService>>(),
         logger: provider.GetRequiredService<ILogger<LibraryService>>(),
         queueService: provider.GetRequiredService<IRequestQueueService>()
@@ -49,7 +49,7 @@ var GetReservationService = (IServiceProvider provider) =>
 {
     return new ReservationService(
         httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(),
-        baseUrl: builder.Configuration.GetConnectionString("ReservationService"),
+        baseUrl: Environment.GetEnvironmentVariable("ConnectionStrings__ReservationService"),
         circuitBreaker: provider.GetRequiredService<ICircuitBreaker<IReservationService>>(),
         logger: provider.GetRequiredService<ILogger<ReservationService>>(),
         queueService: provider.GetRequiredService<IRequestQueueService>()
@@ -61,7 +61,7 @@ builder.Services.AddTransient<IRequestQueueUser, ReservationService>(provider =>
 var GetRatingService = (IServiceProvider provider) =>
 {
     return new RatingService(httpClientFactory: provider.GetRequiredService<IHttpClientFactory>(),
-        baseUrl: builder.Configuration.GetConnectionString("RatingService"),
+        baseUrl: Environment.GetEnvironmentVariable("ConnectionStrings__RatingService"),
         circuitBreaker: provider.GetRequiredService<ICircuitBreaker<IRatingService>>(),
         logger: provider.GetRequiredService<ILogger<RatingService>>(),
         queueService: provider.GetRequiredService<IRequestQueueService>());
@@ -69,11 +69,7 @@ var GetRatingService = (IServiceProvider provider) =>
 builder.Services.AddTransient<IRatingService, RatingService>(provider => GetRatingService(provider));
 builder.Services.AddTransient<IRequestQueueUser, RatingService>(provider => GetRatingService(provider));
 
-var redisConnection = builder.Configuration.GetConnectionString("RedisQueue");
-Console.WriteLine(redisConnection);
-if (redisConnection == null)
-    redisConnection = "redis-master:6379,password=redis_pass,abortConnect=false";
-
+var redisConnection = Environment.GetEnvironmentVariable("ConnectionStrings__RedisQueue");
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnection));
 
 builder.Services.AddTransient<IRequestQueueService, RequestQueueService>();
