@@ -52,123 +52,123 @@ jobs:
       #   continue-on-error: true
       #   run: docker compose down -v
 
-  Publish:
-    runs-on: ubuntu-latest
+  # Publish:
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+  #   - name: Set up Docker Buildx
+  #     uses: docker/setup-buildx-action@v1
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+  #   - name: Log in to Docker Hub
+  #     uses: docker/login-action@v1
+  #     with:
+  #       username: ${{ secrets.DOCKER_USERNAME }}
+  #       password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker images
-      run: |
-        docker compose build
-        docker compose push
+  #   - name: Build and push Docker images
+  #     run: |
+  #       docker compose build
+  #       docker compose push
 
-  Deploy:
-    needs: Publish
-    runs-on: ubuntu-latest
+  # Deploy:
+  #   needs: Publish
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
 
-    - name: Stop containers
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER_NAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        port: 22
-        script: |
-            cd ${{ env.APP_PATH }}
-            docker compose down --rmi all
+  #   - name: Stop containers
+  #     uses: appleboy/ssh-action@v1.0.3
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.SSH_USER_NAME }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.SSH_PASS }}
+  #       port: 22
+  #       script: |
+  #           cd ${{ env.APP_PATH }}
+  #           docker compose down --rmi all
 
-    - name: Clear app directory
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER_NAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        port: 22
-        script: |
-            rm -rf ${{ env.APP_PATH }}
-            mkdir -p ${{ env.APP_PATH }}
+  #   - name: Clear app directory
+  #     uses: appleboy/ssh-action@v1.0.3
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.SSH_USER_NAME }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.SSH_PASS }}
+  #       port: 22
+  #       script: |
+  #           rm -rf ${{ env.APP_PATH }}
+  #           mkdir -p ${{ env.APP_PATH }}
 
-    - name: Copy docker-compose file
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER_NAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        port: 22
-        source: ./docker-compose.yml
-        target: ${{ env.APP_PATH }}
+  #   - name: Copy docker-compose file
+  #     uses: appleboy/scp-action@v0.1.7
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.SSH_USER_NAME }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.SSH_PASS }}
+  #       port: 22
+  #       source: ./docker-compose.yml
+  #       target: ${{ env.APP_PATH }}
 
-    - name: Copy postgres configs
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER_NAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        port: 22
-        source: ./postgres
-        target: ${{ env.APP_PATH }}
+  #   - name: Copy postgres configs
+  #     uses: appleboy/scp-action@v0.1.7
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.SSH_USER_NAME }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.SSH_PASS }}
+  #       port: 22
+  #       source: ./postgres
+  #       target: ${{ env.APP_PATH }}
 
-    - name: Copy redis configs
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER_NAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        port: 22
-        source: ./redis
-        target: ${{ env.APP_PATH }}
+  #   - name: Copy redis configs
+  #     uses: appleboy/scp-action@v0.1.7
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.SSH_USER_NAME }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.SSH_PASS }}
+  #       port: 22
+  #       source: ./redis
+  #       target: ${{ env.APP_PATH }}
 
-    - name: Copy env files
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER_NAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        port: 22
-        source: ./env
-        target: ${{ env.APP_PATH }}
+  #   - name: Copy env files
+  #     uses: appleboy/scp-action@v0.1.7
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.SSH_USER_NAME }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.SSH_PASS }}
+  #       port: 22
+  #       source: ./env
+  #       target: ${{ env.APP_PATH }}
 
-    - name: Create env
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER_NAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        port: 22
-        script: |
-            cd ${{ env.APP_PATH }}
-            touch .env && echo -e "ASPNETCORE_ENVIRONMENT=${{env.ASPNETCORE_ENVIRONMENT}}\nGATEWAY_PORT=${{ env.GATEWAY_PORT }}\nRATING_PORT=${{ env.RATING_PORT }}\nLIBRARY_PORT=${{ env.LIBRARY_PORT }}\nRESERVATION_PORT=${{ env.RESERVATION_PORT }}\n" > .env
+  #   - name: Create env
+  #     uses: appleboy/ssh-action@v1.0.3
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.SSH_USER_NAME }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.SSH_PASS }}
+  #       port: 22
+  #       script: |
+  #           cd ${{ env.APP_PATH }}
+  #           touch .env && echo -e "ASPNETCORE_ENVIRONMENT=${{env.ASPNETCORE_ENVIRONMENT}}\nGATEWAY_PORT=${{ env.GATEWAY_PORT }}\nRATING_PORT=${{ env.RATING_PORT }}\nLIBRARY_PORT=${{ env.LIBRARY_PORT }}\nRESERVATION_PORT=${{ env.RESERVATION_PORT }}\n" > .env
 
-    - name: Start containers
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER_NAME }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASS }}
-        port: 22
-        script: |
-            cd ${{ env.APP_PATH }}
-            docker compose up -d
+  #   - name: Start containers
+  #     uses: appleboy/ssh-action@v1.0.3
+  #     with:
+  #       host: ${{ secrets.HOST }}
+  #       username: ${{ secrets.SSH_USER_NAME }}
+  #       key: ${{ secrets.SSH_KEY }}
+  #       passphrase: ${{ secrets.SSH_PASS }}
+  #       port: 22
+  #       script: |
+  #           cd ${{ env.APP_PATH }}
+  #           docker compose up -d
