@@ -2,7 +2,7 @@ name: Classroom
 on:
   push:
     branches:
-      - any
+      - "*"
   pull_request:
     branches:
       - master
