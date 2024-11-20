@@ -2,15 +2,15 @@ name: Classroom
 on:
   push:
     branches:
-      - master
+      - any
   pull_request:
     branches:
       - master
 env:
-  APP_PATH: /home/${{ secrets.SSH_USER_NAME }}/lab2
-
   ASPNETCORE_ENVIRONMENT: Development
   BUILD_CONFIGURATION: Debug
+
+  APP_PATH: /home/${{ secrets.SSH_USER_NAME }}/lab2
 
   GATEWAY_PORT: ${{ vars.GATEWAY_PORT }}
   LIBRARY_PORT: ${{ vars.LIBRARY_PORT }}
